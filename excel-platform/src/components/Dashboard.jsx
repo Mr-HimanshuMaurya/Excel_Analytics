@@ -24,7 +24,7 @@ const ActionButton = ({ onClick, color, children }) => {
   return (
     <button
       onClick={onClick}
-      className={`px-8 py-3 ${colorClasses[color]} text-white rounded-lg text-lg font-medium transition-colors duration-300 shadow-md`}
+      className={`px-4 sm:px-6 md:px-8 py-2 sm:py-3 ${colorClasses[color]} text-white rounded-lg text-base sm:text-lg font-medium transition-colors duration-300 shadow-md`}
     >
       {children}
     </button>
@@ -47,7 +47,9 @@ const FeatureCard = ({ title, description, color }) => {
         .slice(0, 2)
         .join(" ")} p-6 rounded-lg border`}
     >
-      <h3 className={`text-xl font-medium ${textColor} mb-2`}>{title}</h3>
+      <h3 className={`text-lg sm:text-xl font-medium ${textColor} mb-2`}>
+        {title}
+      </h3>
       <p className="text-gray-600">{description}</p>
     </div>
   );
@@ -87,15 +89,15 @@ const Dashboard = React.memo(() => {
   return (
     <div className="min-h-screen bg-gray-50 font-poppins">
       <header className="fixed top-0 left-0 right-0 bg-white shadow-lg z-10 border-b border-gray-200">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+        <div className="container mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 flex justify-between items-center">
           <motion.h1
-            className="text-3xl md:text-5xl font-bold text-blue-600 font-playfair tracking-wide"
+            className="text-xl sm:text-2xl md:text-3xl lg:text-5xl font-bold text-blue-600 font-playfair tracking-wide"
             {...fadeInDown}
           >
             Excel Analytics
           </motion.h1>
 
-          <div className="flex gap-4">
+          <div className="flex gap-2 sm:gap-4">
             {isAuthenticated ? (
               <ActionButton onClick={handleLogout} color="red">
                 Logout
@@ -120,20 +122,20 @@ const Dashboard = React.memo(() => {
         </div>
       </header>
 
-      <main className="container mx-auto px-6 pt-28 pb-16">
+      <main className="container mx-auto px-3 sm:px-4 md:px-6 pt-20 sm:pt-24 md:pt-28 pb-8 sm:pb-12 md:pb-16">
         <motion.div
-          className="bg-white rounded-xl shadow-lg p-6 md:p-8"
+          className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8"
           {...fadeInUp}
         >
-          <h2 className="text-2xl font-semibold mb-4">
+          <h2 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4">
             Welcome to Excel Analytics
           </h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
             Your powerful platform for analyzing Excel data. Upload your files
             and get started with advanced analytics.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {features.map((feature, index) => (
               <FeatureCard
                 key={index}
@@ -145,10 +147,10 @@ const Dashboard = React.memo(() => {
           </div>
 
           {isAuthenticated && (
-            <div className="mt-8 text-center">
+            <div className="mt-6 sm:mt-8 text-center">
               <button
                 onClick={() => handleNavigation("/file-upload-alt")}
-                className="px-8 py-3 bg-blue-500 text-white rounded-lg text-lg font-medium hover:bg-blue-600 transition-colors duration-300 shadow-md"
+                className="px-4 sm:px-6 md:px-8 py-2 sm:py-3 bg-blue-500 text-white rounded-lg text-base sm:text-lg font-medium hover:bg-blue-600 transition-colors duration-300 shadow-md"
               >
                 Go to File Upload
               </button>
@@ -157,8 +159,8 @@ const Dashboard = React.memo(() => {
         </motion.div>
       </main>
 
-      <footer className="bg-gray-800 text-white py-6">
-        <div className="container mx-auto px-4 text-center">
+      <footer className="bg-gray-800 text-white py-4 sm:py-6">
+        <div className="container mx-auto px-3 sm:px-4 text-center text-sm sm:text-base">
           <p>
             © {new Date().getFullYear()} Excel Analytics. All rights reserved.
           </p>
