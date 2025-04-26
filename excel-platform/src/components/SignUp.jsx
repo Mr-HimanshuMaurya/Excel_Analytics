@@ -106,15 +106,17 @@ const SignUp = () => {
 
   return (
     <motion.div
-      className="flex items-center justify-center min-h-screen bg-gray-100 p-4"
+      className="flex items-center justify-center min-h-screen bg-gray-100 p-3 sm:p-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
       <form
         onSubmit={handleSignup}
-        className="bg-white w-full max-w-md p-8 rounded-2xl shadow-lg flex flex-col gap-4 animate-slide-up"
+        className="bg-white w-full max-w-md p-5 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl shadow-lg flex flex-col gap-3 sm:gap-4 animate-slide-up"
       >
-        <h2 className="text-2xl font-semibold text-center">Sign Up</h2>
+        <h2 className="text-xl sm:text-2xl font-semibold text-center">
+          Sign Up
+        </h2>
 
         <input
           type="text"
@@ -122,7 +124,7 @@ const SignUp = () => {
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
-          className="px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-300"
+          className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-300"
         />
 
         <input
@@ -131,7 +133,7 @@ const SignUp = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-300"
+          className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-300"
         />
 
         <input
@@ -140,19 +142,19 @@ const SignUp = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-300"
+          className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-300"
         />
 
         <button
           type="submit"
-          className="w-full py-3 bg-green-500 text-white rounded-lg text-base font-medium transition-transform duration-200 hover:bg-green-600 hover:scale-105 disabled:opacity-50"
+          className="w-full py-2 sm:py-3 bg-green-500 text-white rounded-lg text-sm sm:text-base font-medium transition-transform duration-200 hover:bg-green-600 hover:scale-105 disabled:opacity-50"
         >
           Sign Up
         </button>
 
         <p
           onClick={() => navigate("/login")}
-          className="text-center text-sm text-blue-600 cursor-pointer"
+          className="text-center text-xs sm:text-sm text-blue-600 cursor-pointer"
         >
           Already have an account? Login
         </p>

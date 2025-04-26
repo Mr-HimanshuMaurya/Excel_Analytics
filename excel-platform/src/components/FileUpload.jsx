@@ -10,8 +10,16 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { Bar, Line, Pie, Doughnut, Radar, PolarArea } from "react-chartjs-2";
+import { Bar, Line, Pie, Doughnut } from "react-chartjs-2";
 import * as XLSX from "xlsx";
+import LayoutSetter from "./LayoutSetter";
+import {
+  Upload,
+  BarChart2,
+  FileText,
+  ChevronDown,
+  AlertTriangle,
+} from "lucide-react";
 
 ChartJS.register(
   CategoryScale,
@@ -24,7 +32,7 @@ ChartJS.register(
   Legend
 );
 
-const chartTypes = ["Bar", "Line", "Pie", "Doughnut", "Radar", "PolarArea"];
+const chartTypes = ["Bar", "Line", "Pie", "Doughnut"];
 
 const FileUpload = () => {
   const [fileName, setFileName] = useState("");
@@ -37,7 +45,6 @@ const FileUpload = () => {
   const [yAxis, setYAxis] = useState("");
   const [generatedChart, setGeneratedChart] = useState(null);
 
-  // Reset selections when chart type changes
   useEffect(() => {
     setGeneratedChart(null);
   }, [chartType]);
@@ -49,55 +56,46 @@ const FileUpload = () => {
         "application/vnd.ms-excel",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       ];
-
       if (validTypes.includes(file.type)) {
         setFileName(file.name);
         setError("");
         readExcel(file);
       } else {
-        setFileName("");
-        setExcelData(null);
-        setChartData(null);
-        setChartType("");
-        setHeaders([]);
-        setXAxis("");
-        setYAxis("");
-        setGeneratedChart(null);
+        resetAll();
         setError("Please upload a valid Excel file (.xls or .xlsx)");
       }
     }
   };
 
+  const resetAll = () => {
+    setFileName("");
+    setExcelData(null);
+    setChartData(null);
+    setChartType("");
+    setHeaders([]);
+    setXAxis("");
+    setYAxis("");
+    setGeneratedChart(null);
+  };
+
   const readExcel = (file) => {
     const reader = new FileReader();
-
     reader.onload = (event) => {
       try {
         const data = new Uint8Array(event.target.result);
         const workbook = XLSX.read(data, { type: "array" });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
         if (jsonData.length > 1) {
-          // Store the full Excel data
           setExcelData(jsonData);
-
-          // Extract headers (first row)
-          const headerRow = jsonData[0];
-          setHeaders(headerRow);
-
-          // Reset selections
-          setXAxis("");
-          setYAxis("");
-          setChartType("");
-          setGeneratedChart(null);
+          setHeaders(jsonData[0]);
         } else {
           setError("Excel file must contain at least one row of data");
         }
       } catch (err) {
         console.error("Error reading Excel file:", err);
-        setError("Failed to read Excel file. Please try another file.");
+        setError("Failed to read file. Please try another file.");
       }
     };
     reader.readAsArrayBuffer(file);
@@ -109,7 +107,6 @@ const FileUpload = () => {
       return;
     }
 
-    // Find column indices
     const xIndex = headers.indexOf(xAxis);
     const yIndex = headers.indexOf(yAxis);
 
@@ -118,12 +115,10 @@ const FileUpload = () => {
       return;
     }
 
-    // Extract data for the selected columns
     const labels = excelData.slice(1).map((row) => row[xIndex]);
     const values = excelData.slice(1).map((row) => row[yIndex]);
 
-    // Create chart data
-    const newChartData = {
+    setChartData({
       labels,
       datasets: [
         {
@@ -134,16 +129,13 @@ const FileUpload = () => {
           borderWidth: 1,
         },
       ],
-    };
-
-    setChartData(newChartData);
+    });
     setGeneratedChart(chartType);
     setError("");
   };
 
   const renderChart = () => {
     if (!chartData || !generatedChart) return null;
-
     const chartProps = { data: chartData };
     switch (generatedChart) {
       case "Bar":
@@ -154,135 +146,135 @@ const FileUpload = () => {
         return <Pie {...chartProps} />;
       case "Doughnut":
         return <Doughnut {...chartProps} />;
-      case "Radar":
-        return <Radar {...chartProps} />;
-      case "PolarArea":
-        return <PolarArea {...chartProps} />;
       default:
         return null;
     }
   };
 
-  // Check if axes selection should be enabled based on chart type
-  const isAxesSelectionEnabled = () => {
-    return (
-      excelData && chartType && ["Bar", "Line", "Radar"].includes(chartType)
-    );
-  };
+  const isAxesSelectionEnabled = () =>
+    excelData && chartType && ["Bar", "Line"].includes(chartType);
 
   return (
-    // Upload Container
-    <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] grid-rows-[auto_1fr] gap-5 p-5 min-h-screen">
-      <div className="bg-gray-50 p-5 rounded-lg shadow-md text-center h-fit">
-        <h2 className="text-xl font-semibold mb-5 text-gray-700">
-          Upload Excel File
-        </h2>
-        <input
-          type="file"
-          accept=".xls,.xlsx"
-          id="fileInput"
-          onChange={handleFileChange}
-          className="hidden"
-        />
-        <label
-          htmlFor="fileInput"
-          className="inline-block px-5 py-2.5 bg-green-500 text-white rounded-md font-medium cursor-pointer hover:bg-green-600 transition-colors duration-300"
-        >
-          Choose File
-        </label>
-        {fileName && (
-          <p className="mt-4 text-sm text-gray-700">
-            Selected File: {fileName}
-          </p>
-        )}
-        {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
-      </div>
+    <LayoutSetter>
+      <div className="p-8 space-y-8 min-h-screen bg-gradient-to-tr from-blue-50 via-white to-blue-100">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Upload Card Section*/}
+          <div className="bg-white p-6 rounded-2xl shadow-xl space-y-6 border border-gray-200">
+            <h2 className="text-2xl font-bold text-blue-700 text-center flex items-center justify-center gap-2">
+              <Upload className="w-6 h-6" /> Upload Excel
+            </h2>
+            <input
+              type="file"
+              accept=".xls,.xlsx"
+              id="fileInput"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <label
+              htmlFor="fileInput"
+              className="block w-full text-center py-3 bg-gradient-to-r from-green-400 to-green-600 text-white rounded-lg cursor-pointer hover:opacity-90 transition-all font-semibold"
+            >
+              <Upload className="inline w-5 h-5 mr-2" /> Choose File
+            </label>
 
-      {/* Chart Options */}
-      <div className="flex justify-end">
-        <div className="w-full max-w-md bg-gray-50 p-5 rounded-lg shadow-md flex flex-col gap-4">
-          <h3 className="text-lg font-medium text-center text-gray-700">
-            Chart Options
-          </h3>
+            {fileName && (
+              <p className="text-sm text-gray-700 flex items-center justify-center gap-2">
+                <FileText className="w-4 h-4" /> {fileName}
+              </p>
+            )}
+            {error && (
+              <p className="text-sm text-red-500 flex items-center justify-center gap-2">
+                <AlertTriangle className="w-4 h-4" /> {error}
+              </p>
+            )}
+          </div>
 
-          <select
-            disabled={!excelData}
-            value={chartType}
-            onChange={(e) => setChartType(e.target.value)}
-            className={`w-full p-3 rounded-md border text-base ${
-              !excelData
-                ? "bg-gray-100 cursor-not-allowed"
-                : "bg-white border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-            }`}
-          >
-            <option value="">Select Chart Type</option>
-            {chartTypes.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
+          <div className="bg-white p-6 rounded-2xl shadow-xl space-y-6 border border-gray-200">
+            <h3 className="text-xl font-bold text-blue-700 text-center flex items-center justify-center gap-2">
+              <BarChart2 className="w-6 h-6" /> Chart Options
+            </h3>
 
-          <select
-            disabled={!isAxesSelectionEnabled()}
-            value={xAxis}
-            onChange={(e) => setXAxis(e.target.value)}
-            className={`w-full p-3 rounded-md border text-base ${
-              !isAxesSelectionEnabled()
-                ? "bg-gray-100 cursor-not-allowed"
-                : "bg-white border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-            }`}
-          >
-            <option value="">Select X-Axis Data</option>
-            {headers.map((header, index) => (
-              <option key={`x-${index}`} value={header}>
-                {header}
-              </option>
-            ))}
-          </select>
+            <div className="space-y-4">
+              {/* Chart Type */}
+              <div className="relative">
+                <select
+                  disabled={!excelData}
+                  value={chartType}
+                  onChange={(e) => setChartType(e.target.value)}
+                  className="w-full p-3 pr-10 rounded-md border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-blue-300 appearance-none"
+                >
+                  <option value="">Select Chart Type</option>
+                  {chartTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+              </div>
 
-          <select
-            disabled={!isAxesSelectionEnabled()}
-            value={yAxis}
-            onChange={(e) => setYAxis(e.target.value)}
-            className={`w-full p-3 rounded-md border text-base ${
-              !isAxesSelectionEnabled()
-                ? "bg-gray-100 cursor-not-allowed"
-                : "bg-white border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-            }`}
-          >
-            <option value="">Select Y-Axis Data</option>
-            {headers.map((header, index) => (
-              <option key={`y-${index}`} value={header}>
-                {header}
-              </option>
-            ))}
-          </select>
+              <div className="relative">
+                <select
+                  disabled={!isAxesSelectionEnabled()}
+                  value={xAxis}
+                  onChange={(e) => setXAxis(e.target.value)}
+                  className="w-full p-3 pr-10 rounded-md border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-blue-300 appearance-none"
+                >
+                  <option value="">Select X-Axis</option>
+                  {headers.map((header, idx) => (
+                    <option key={`x-${idx}`} value={header}>
+                      {header}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+              </div>
 
-          <button
-            disabled={
-              !chartType ||
-              (!["Pie", "Doughnut", "PolarArea"].includes(chartType) &&
-                (!xAxis || !yAxis))
-            }
-            onClick={generateChart}
-            className={`mt-2 py-3 px-5 rounded-md font-medium text-white ${
-              !chartType ||
-              (!["Pie", "Doughnut", "PolarArea"].includes(chartType) &&
-                (!xAxis || !yAxis))
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-600 transition-colors duration-300"
-            }`}
-          >
-            Generate Chart
-          </button>
+              <div className="relative">
+                <select
+                  disabled={!isAxesSelectionEnabled()}
+                  value={yAxis}
+                  onChange={(e) => setYAxis(e.target.value)}
+                  className="w-full p-3 pr-10 rounded-md border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-blue-300 appearance-none"
+                >
+                  <option value="">Select Y-Axis</option>
+                  {headers.map((header, idx) => (
+                    <option key={`y-${idx}`} value={header}>
+                      {header}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+              </div>
+
+              <button
+                disabled={
+                  !chartType ||
+                  (!["Pie", "Doughnut"].includes(chartType) &&
+                    (!xAxis || !yAxis))
+                }
+                onClick={generateChart}
+                className={`w-full py-3 rounded-md font-semibold flex items-center justify-center gap-2 transition-all duration-300 ${
+                  !chartType ||
+                  (!["Pie", "Doughnut"].includes(chartType) &&
+                    (!xAxis || !yAxis))
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-500 hover:bg-blue-600 text-white"
+                }`}
+              >
+                <BarChart2 className="w-5 h-5" /> Generate Chart
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-2xl p-8 min-h-[400px] flex justify-center items-center border border-gray-200">
+          {renderChart() || (
+            <p className="text-gray-400 text-lg">No chart generated yet.</p>
+          )}
         </div>
       </div>
-
-      <div className="col-span-1 md:col-span-2 bg-white rounded-lg shadow-md p-5 min-h-[400px] flex justify-center items-center">
-        {renderChart()}
-      </div>
-    </div>
+    </LayoutSetter>
   );
 };
 
