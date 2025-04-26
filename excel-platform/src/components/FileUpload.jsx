@@ -19,8 +19,8 @@ import {
   FileText,
   ChevronDown,
   AlertTriangle,
+  RefreshCcw,
 } from "lucide-react";
-
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -76,6 +76,7 @@ const FileUpload = () => {
     setXAxis("");
     setYAxis("");
     setGeneratedChart(null);
+    setError("");
   };
 
   const readExcel = (file) => {
@@ -156,9 +157,22 @@ const FileUpload = () => {
 
   return (
     <LayoutSetter>
-      <div className="p-8 space-y-8 min-h-screen bg-gradient-to-tr from-blue-50 via-white to-blue-100">
+      <div className="relative p-8 space-y-8 min-h-screen bg-gradient-to-tr from-blue-50 via-white to-blue-100">
+        <div className="absolute top-4 right-4">
+          <div className="relative group">
+            <button
+              onClick={resetAll}
+              className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-all border border-gray-300"
+            >
+              <RefreshCcw className="w-5 h-5 text-blue-600" />
+            </button>
+            <div className="absolute top-full mt-2 left-3/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-all bg-gray-800 text-white text-xs rounded-md px-3 py-1 whitespace-nowrap">
+              Reset All Data
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Upload Card Section*/}
           <div className="bg-white p-6 rounded-2xl shadow-xl space-y-6 border border-gray-200">
             <h2 className="text-2xl font-bold text-blue-700 text-center flex items-center justify-center gap-2">
               <Upload className="w-6 h-6" /> Upload Excel
@@ -213,6 +227,7 @@ const FileUpload = () => {
                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
               </div>
 
+              {/* X-Axis */}
               <div className="relative">
                 <select
                   disabled={!isAxesSelectionEnabled()}
@@ -230,6 +245,7 @@ const FileUpload = () => {
                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
               </div>
 
+              {/* Y-Axis */}
               <div className="relative">
                 <select
                   disabled={!isAxesSelectionEnabled()}
@@ -246,7 +262,6 @@ const FileUpload = () => {
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
               </div>
-
               <button
                 disabled={
                   !chartType ||
@@ -267,10 +282,9 @@ const FileUpload = () => {
             </div>
           </div>
         </div>
-
         <div className="bg-white rounded-2xl shadow-2xl p-8 min-h-[400px] flex justify-center items-center border border-gray-200">
           {renderChart() || (
-            <p className="text-gray-400 text-lg">No chart generated yet.</p>
+            <p className="text-gray-400 text-lg">No chart generated yet</p>
           )}
         </div>
       </div>
