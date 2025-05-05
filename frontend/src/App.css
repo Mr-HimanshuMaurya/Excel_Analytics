@@ -1,0 +1,45 @@
+.landingPageContainer{
+  width: 100vw;
+  height: 100vh;
+  background-image:radial-gradient(rgba(0, 0, 0, 0.9),rgba(0, 0, 0, 0.8)), url(../public/excelBg.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: white;
+}
+.landingPageContainer nav{
+  padding-inline: 1.2rem;
+  padding-block: 1.6rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  
+}
+.landingPageContainer nav h2{
+  font-size: 2rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #d97500;
+}
+.landingPageContainer nav .navList{
+  display: flex;
+  gap:1.6rem;
+  cursor: pointer;
+}
+.landingMainContainer{
+  display: flex;
+  justify-content: space-between;
+  padding-inline:3rem;
+  height: 80vh;
+  align-items: center;
+  font-size: 1.5rem;
+}
+.link{
+  background-color: #d97500;
+  width: fit-content;
+  padding: 1rem;
+  cursor: pointer;
+  border-radius: 1.4rem;
+  margin-top: 2rem;
+}
+
