@@ -10,8 +10,8 @@ return (
                             <h2>Excellytics</h2>
                     </div>
                     <div className='navList'>
-                            <p className="reg">Register</p>
-                            <p className="log">Login</p>
+                            <a href="/auth" className="reg">Register</a>
+                            <a href="/auth" className="log">Login</a>
                     </div>
             </nav>
             
