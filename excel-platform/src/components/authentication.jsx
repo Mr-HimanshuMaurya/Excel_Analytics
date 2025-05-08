@@ -166,8 +166,12 @@ export default function Authentication() {
         <p
           onClick={() => setFormState(0)}
           className="text-center text-xs sm:text-sm text-blue-600 cursor-pointer"
-        >
-          Don't have an account? Sign Up
+        > 
+        {isAdminLogin ? (
+          <p>Admin Registration</p>
+        ) : (
+          <p> Don't have an account? Sign Up</p>
+        )}
           </p>
           :
           <p
