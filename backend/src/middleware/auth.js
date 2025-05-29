@@ -1,8 +1,13 @@
 import { User } from "../models/userModel.js";
 
 export const isAdmin = async (req, res, next) => {
+ 
   const userId =
-  req.body.userId || req.headers["x-user-id"] || req.query.userId;
+    (req.body && req.body.userId) ||
+    (req.headers && req.headers["x-user-id"]) ||
+    (req.query && req.query.userId);
+
+  console.log("🛡 userId received:", userId); // debug log
 
   if (!userId) {
     return res.status(400).json({ message: "User ID not provided" });
@@ -18,8 +23,9 @@ export const isAdmin = async (req, res, next) => {
       return res.status(403).json({ message: "Access denied. Admins only." });
     }
 
-    next(); //  Admin verified
+    next();
   } catch (error) {
-    return res.status(500).json({ message: "Server error", error });
+    console.error(error);
+    res.status(500).json({ message: "Server error", error });
   }
 };
