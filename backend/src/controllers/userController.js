@@ -28,7 +28,7 @@ const login = async (req, res) => {
 };
 
 const register = async (req,res)=>{
-    const {username, password, email} = req.body;
+    const {username, password, email, isAdmin} = req.body;
     try{
         const existingUser = await User.findOne({username});
         if(existingUser){
@@ -36,10 +36,11 @@ const register = async (req,res)=>{
         };
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
-            username:username,
-            password:hashedPassword,
-            email:email,
-        });
+        username,
+        password: hashedPassword,
+        email,
+        isAdmin: isAdmin || false 
+    });
         await newUser.save();
         res.status(httpStatus.CREATED).json({message:"USER REGISTER", newUser});
     }catch(e){

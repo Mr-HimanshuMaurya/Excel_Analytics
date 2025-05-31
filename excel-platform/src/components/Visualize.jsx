@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Plot from "react-plotly.js";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,7 +13,6 @@ import {
 } from "chart.js";
 import { Bar, Line, Pie, Doughnut } from "react-chartjs-2";
 import * as XLSX from "xlsx";
-import LayoutSetter from "./LayoutSetter";
 import {
   Upload,
   BarChart2,
@@ -21,6 +21,7 @@ import {
   AlertTriangle,
   RefreshCcw,
 } from "lucide-react";
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -32,9 +33,9 @@ ChartJS.register(
   Legend
 );
 
-const chartTypes = ["Bar", "Line", "Pie", "Doughnut"];
+const chartTypes = ["Bar", "Line", "Pie", "Doughnut", "3D Scatter", "3D Line", "3D Surface"];
 
-const FileUpload = () => {
+const Visualize = () => {
   const [fileName, setFileName] = useState("");
   const [error, setError] = useState("");
   const [chartType, setChartType] = useState("");
@@ -102,67 +103,170 @@ const FileUpload = () => {
     reader.readAsArrayBuffer(file);
   };
 
-  const generateChart = () => {
-    if (!excelData || !chartType || !xAxis || !yAxis) {
-      setError("Please select chart type, X-axis and Y-axis");
-      return;
+const generateChart = () => {
+  if (!excelData || !chartType) {
+    setError("Please select chart type and axes");
+    return;
+  }
+
+  const xIndex = headers.indexOf(xAxis);
+  const yIndex = headers.indexOf(yAxis);
+
+  if (["Bar", "Line", "Pie", "Doughnut"].includes(chartType)) {
+    if (["Pie", "Doughnut"].includes(chartType)) {
+      if (yIndex === -1) {
+        setError("Please select Y-axis for Pie/Doughnut");
+        return;
+      }
+      const labels = excelData.slice(1).map((row) => row[yIndex]);
+      const values = labels.map(() => 1); // Dummy equal values
+      setChartData({
+        labels,
+        datasets: [
+          {
+            label: yAxis,
+            data: values,
+            backgroundColor: [
+              "#FF6384",
+              "#36A2EB",
+              "#FFCE56",
+              "#4BC0C0",
+              "#9966FF",
+              "#FF9F40",
+            ],
+          },
+        ],
+      });
+    } else {
+      if (xIndex === -1 || yIndex === -1) {
+        setError("Invalid axis selection");
+        return;
+      }
+      const labels = excelData.slice(1).map((row) => row[xIndex]);
+      const values = excelData.slice(1).map((row) =>
+        parseFloat(row[yIndex])
+      );
+
+      if (values.some((val) => isNaN(val))) {
+        setError("Y-axis contains non-numeric values");
+        return;
+      }
+
+      setChartData({
+        labels,
+        datasets: [
+          {
+            label: yAxis,
+            data: values,
+            backgroundColor: "rgba(75, 192, 192, 0.6)",
+            borderColor: "rgba(75, 192, 192, 1)",
+            borderWidth: 1,
+          },
+        ],
+      });
     }
-
-    const xIndex = headers.indexOf(xAxis);
-    const yIndex = headers.indexOf(yAxis);
-
+  } else {
     if (xIndex === -1 || yIndex === -1) {
-      setError("Invalid axis selection");
+      setError("Invalid axis selection for 3D chart");
       return;
     }
 
-    const labels = excelData.slice(1).map((row) => row[xIndex]);
-    const values = excelData.slice(1).map((row) => row[yIndex]);
+    const x = excelData.slice(1).map((row) => row[xIndex]);
+    const y = excelData.slice(1).map((row) => row[yIndex]);
+    const z = y.map((_, idx) => idx); // Auto Z
 
-    setChartData({
-      labels,
-      datasets: [
-        {
-          label: yAxis,
-          data: values,
-          backgroundColor: "rgba(75, 192, 192, 0.6)",
-          borderColor: "rgba(75, 192, 192, 1)",
-          borderWidth: 1,
+    let data = [];
+
+   if (chartType === "3D Scatter") {
+    data = [
+      {
+        type: "scatter3d",
+        mode: "markers",
+        x,
+        y,
+        z,
+        marker: {
+          size: 5,
+          color: "#17BECF",
+          colorscale: "Viridis",
         },
-      ],
-    });
-    setGeneratedChart(chartType);
-    setError("");
-  };
+      },
+    ];
+  } else if (chartType === "3D Line") {
+    data = [
+      {
+        type: "scatter3d",
+      mode: "lines",
+      x,
+      y,
+      z,
+      line: {
+        width: 6,
+        color: "#17BECF",
+        },
+      },
+    ];
+  } else if (chartType === "3D Surface") {
+    const size = Math.floor(Math.sqrt(y.length));
+    if (size * size !== y.length) {
+      setError("3D Surface requires square data (e.g. 16 rows, 25 rows, etc.)");
+      return;
+    }
+    const gridZ = [];
+    for (let i = 0; i < size; i++) {
+      gridZ.push(y.slice(i * size, (i + 1) * size));
+    }
+    data = [
+      {
+        type: "surface",
+        z: gridZ,
+      },
+    ];
+  }
+
+  setChartData(data);
+}
+
+  setGeneratedChart(chartType);
+  setError("");
+};
 
   const renderChart = () => {
     if (!chartData || !generatedChart) return null;
-    const chartProps = { data: chartData };
-    switch (generatedChart) {
-      case "Bar":
-        return <Bar {...chartProps} />;
-      case "Line":
-        return <Line {...chartProps} />;
-      case "Pie":
-        return <Pie {...chartProps} />;
-      case "Doughnut":
-        return <Doughnut {...chartProps} />;
-      default:
-        return null;
+
+    if (["Bar", "Line", "Pie", "Doughnut"].includes(generatedChart)) {
+      const props = { data: chartData };
+      switch (generatedChart) {
+        case "Bar":
+          return <Bar {...props} />;
+        case "Line":
+          return <Line {...props} />;
+        case "Pie":
+          return <Pie {...props} />;
+        case "Doughnut":
+          return <Doughnut {...props} />;
+        default:
+          return null;
+      }
+    } else {
+      return <Plot data={chartData} layout={{ autosize: true, height: 500 }} />;
     }
   };
 
   const isAxesSelectionEnabled = () =>
-    excelData && chartType && ["Bar", "Line"].includes(chartType);
+    excelData && chartType && !["Pie", "Doughnut"].includes(chartType);
 
   return (
-    <LayoutSetter>
-      <div className="relative p-8 space-y-8 min-h-screen bg-gradient-to-tr from-blue-50 via-white to-blue-100">
+    <>
+      <div className="p-8 space-y-8 bg-gradient-to-tr from-red-600 via-white to-yellow-400">
+        <h2 className="text-3xl font-bold text-center text-blue-700">
+          2D & 3D Chart Visualizer
+        </h2>
         <div className="absolute top-4 right-4">
           <div className="relative group">
             <button
               onClick={resetAll}
-              className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-all border border-gray-300"
+              className="p-2 mt-10 mr-5 bg-white rounded-full shadow-md hover:bg-gray-100 transition-all border border-gray-300"
             >
               <RefreshCcw className="w-5 h-5 text-blue-600" />
             </button>
@@ -209,7 +313,6 @@ const FileUpload = () => {
             </h3>
 
             <div className="space-y-4">
-              {/* Chart Type */}
               <div className="relative">
                 <select
                   disabled={!excelData}
@@ -224,10 +327,8 @@ const FileUpload = () => {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
               </div>
 
-              {/* X-Axis */}
               <div className="relative">
                 <select
                   disabled={!isAxesSelectionEnabled()}
@@ -236,32 +337,32 @@ const FileUpload = () => {
                   className="w-full p-3 pr-10 rounded-md border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-blue-300 appearance-none"
                 >
                   <option value="">Select X-Axis</option>
-                  {headers.map((header, idx) => (
-                    <option key={`x-${idx}`} value={header}>
-                      {header}
+                  {headers.map((h, i) => (
+                    <option key={i} value={h}>
+                      {h}
                     </option>
                   ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
               </div>
 
-              {/* Y-Axis */}
               <div className="relative">
                 <select
-                  disabled={!isAxesSelectionEnabled()}
+                  disabled={!excelData || !chartType}
                   value={yAxis}
                   onChange={(e) => setYAxis(e.target.value)}
                   className="w-full p-3 pr-10 rounded-md border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-blue-300 appearance-none"
                 >
                   <option value="">Select Y-Axis</option>
-                  {headers.map((header, idx) => (
-                    <option key={`y-${idx}`} value={header}>
-                      {header}
+                  {headers.map((h, i) => (
+                    <option key={i} value={h}>
+                      {h}
                     </option>
                   ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
               </div>
+
               <button
                 disabled={
                   !chartType ||
@@ -282,14 +383,15 @@ const FileUpload = () => {
             </div>
           </div>
         </div>
+
         <div className="bg-white rounded-2xl shadow-2xl p-8 min-h-[400px] flex justify-center items-center border border-gray-200">
           {renderChart() || (
             <p className="text-gray-400 text-lg">No chart generated yet</p>
           )}
         </div>
       </div>
-    </LayoutSetter>
+    </>
   );
 };
 
-export default FileUpload;
+export default Visualize;

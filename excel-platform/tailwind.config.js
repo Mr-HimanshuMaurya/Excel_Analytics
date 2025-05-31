@@ -1,22 +1,11 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
   theme: {
-    extend: {
-      fontFamily: {
-        playfair: ['"Playfair Display"', "serif"],
-        poppins: ["Poppins", "sans-serif"],
-      },
-      animation: {
-        "slide-up": "slideUp 0.5s ease-out",
-      },
-      keyframes: {
-        slideUp: {
-          "0%": { transform: "translateY(20px)", opacity: 0 },
-          "100%": { transform: "translateY(0)", opacity: 1 },
-        },
-      },
-    },
+    extend: {},
   },
   plugins: [],
-};
+}

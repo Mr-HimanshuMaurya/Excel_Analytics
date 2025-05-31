@@ -37,11 +37,19 @@ export const AuthProvider = ({ children }) => {
                 username: username,
                 password: password
             })
-            if(request.status === httpStatus.OK){
-                setUserData(request.data.user)
-                router("/file-upload");
-                return request.data.message;
+             if (request.status === httpStatus.OK) {
+            const user = request.data.user[0]; // because user is an array
+            setUserData(user);
+
+            // Check if the user is admin and route them
+            if (user.isAdmin) {
+                router("/admin"); // go to admin panel
+            } else {
+                router("/dashboard"); // go to regular user panel
             }
+
+            return request.data.message;
+        }
         }catch(error){
             throw error;
         };
