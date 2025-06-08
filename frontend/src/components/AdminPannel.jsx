@@ -19,6 +19,7 @@ export default function AdminPanel() {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const totalUser = users.length
 
    // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -92,20 +93,16 @@ export default function AdminPanel() {
   const selectedUser = users.find(u => u._id === selectedUserId);
 
   return (
-    <div className={`min-h-screen flex flex-col p-6 ${darkMode ? "bg-black text-white" : "bg-gray-100 text-black"}`}>
-      <div className="flex justify-between items-center mb-6">
-        <Typography variant="h4" className="font-bold dark:text-blue-500">
-          <b>👑Admin Panel</b>
+    <div>
+      <div className="flex justify-between items-center mb-6 ml-6 mr-6">
+        <Typography variant="h4" className="font-bold dark:text-blue-500 pt-6">
+          <p><b>👑Admin Panel</b></p>         
         </Typography>
-        <FormControlLabel
-          control={
-            <SunnyIcon
-              // checked={darkMode}
-              onClick={() => setDarkMode(!darkMode)}
-              icon={<SunnyIcon />}
-            />
-          }
-        />
+        <Typography variant="h6" className={` font-bold pt-6`}>
+          <p><b>Total Users- {totalUser}</b></p>         
+        </Typography>
+
+        
       </div>
       {loading ? (
         <Box className="flex justify-center items-center h-64">
@@ -115,19 +112,19 @@ export default function AdminPanel() {
 <>
       <TableContainer component={Paper} className={`${darkMode ? "bg-gray-800" : "bg-white"} shadow-lg`}>
         <Table className="flex justify-evenly items-center ">
-          <TableHead className="bg-gradient-to-r dark:from-blue-500 dark:to-red-500" >
-            <TableRow>
-              <TableCell className="text-white font-semibold w-1"><b>S.No</b></TableCell>
-              <TableCell className="text-white font-bold"><b>Username</b></TableCell>
-              <TableCell className="text-white font-bold"><b>Email</b></TableCell>
-              <TableCell className="text-white font-bold"><b>Join Date</b></TableCell>
-              <TableCell className="text-white font-bold"><b>Is Admin</b></TableCell>
-              <TableCell className="text-white font-bold"><b>Action</b></TableCell>
+          <TableHead className="bg-gradient-to-r dark:from-blue-100 dark:to-pink-100" >
+            <TableRow >
+              <TableCell  style={{color:"black"}} className="text-white font-semibold w-1"><b>S.No</b></TableCell>
+              <TableCell style={{color:"black"}} className="text-white font-bold"><b>Username</b></TableCell>
+              <TableCell style={{color:"black"}} className="text-white font-bold"><b>Email</b></TableCell>
+              <TableCell style={{color:"black"}} className="text-white font-bold"><b>Join Date</b></TableCell>
+              <TableCell style={{color:"black"}} className="text-white font-bold"><b>Is Admin</b></TableCell>
+              <TableCell style={{color:"black"}} className="text-white font-bold"><b>Action</b></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {currentUsers.map((user, index) => (
-              <TableRow key={user._id} className="hover:bg-gray-200 dark:hover:bg-gray-200 transition duration-200">
+              <TableRow key={user._id} className="hover:bg-gray-500 dark:hover:bg-gray-500 transition duration-200">
                  <TableCell><b>{(currentPage - 1) * usersPerPage + index + 1}</b></TableCell>
                 <TableCell>{user.username}</TableCell>
                 <TableCell>{user.email}</TableCell>

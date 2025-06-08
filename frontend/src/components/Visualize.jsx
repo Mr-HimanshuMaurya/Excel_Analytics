@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Plot from "react-plotly.js";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -33,7 +35,7 @@ ChartJS.register(
   Legend
 );
 
-const chartTypes = ["Bar", "Line", "Pie", "Doughnut", "3D Scatter", "3D Line", "3D Surface"];
+const chartTypes = ["Bar", "Line", "Pie", "Doughnut", "3D Scatter", "3D Line", "3D Surface", "3D Bar"];
 
 const Visualize = () => {
   const [fileName, setFileName] = useState("");
@@ -45,6 +47,7 @@ const Visualize = () => {
   const [xAxis, setXAxis] = useState("");
   const [yAxis, setYAxis] = useState("");
   const [generatedChart, setGeneratedChart] = useState(null);
+   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     setGeneratedChart(null);
@@ -78,6 +81,7 @@ const Visualize = () => {
     setYAxis("");
     setGeneratedChart(null);
     setError("");
+    setShowModal(false);
   };
 
   const readExcel = (file) => {
@@ -118,8 +122,15 @@ const generateChart = () => {
         setError("Please select Y-axis for Pie/Doughnut");
         return;
       }
-      const labels = excelData.slice(1).map((row) => row[yIndex]);
-      const values = labels.map(() => 1); // Dummy equal values
+      const labels = excelData.slice(1).map((row) => row[xIndex]);
+const values = excelData.slice(1).map((row) =>
+  parseFloat(row[yIndex])
+);
+
+if (values.some((val) => isNaN(val))) {
+  setError("Y-axis contains non-numeric values for Pie/Doughnut");
+  return;
+}
       setChartData({
         labels,
         datasets: [
@@ -206,24 +217,26 @@ const generateChart = () => {
         },
       },
     ];
-  } else if (chartType === "3D Surface") {
-    const size = Math.floor(Math.sqrt(y.length));
-    if (size * size !== y.length) {
-      setError("3D Surface requires square data (e.g. 16 rows, 25 rows, etc.)");
-      return;
-    }
-    const gridZ = [];
-    for (let i = 0; i < size; i++) {
-      gridZ.push(y.slice(i * size, (i + 1) * size));
-    }
-    data = [
-      {
-        type: "surface",
-        z: gridZ,
-      },
-    ];
-  }
+  } else if (chartType === "3D Bar") {
 
+  let xValues = excelData.slice(1).map((row) => {
+    const val = row[xIndex];
+    return isNaN(val) ? headers.indexOf(val) : Number(val);
+  });
+
+  let yValues = excelData.slice(1).map((row) => {
+    const val = row[yIndex];
+    return isNaN(val) ? headers.indexOf(val) : Number(val);
+  });
+
+  const bars = xValues.map((xVal, idx) => {
+    const yVal = idx; // Spread bars along Y
+    const height = yValues[idx];
+    return createCuboid(xVal, yVal, height);  // Correct
+  });
+
+  data = bars;
+}
   setChartData(data);
 }
 
@@ -249,12 +262,99 @@ const generateChart = () => {
           return null;
       }
     } else {
-      return <Plot data={chartData} layout={{ autosize: true, height: 500 }} />;
+      return <Plot
+    data={chartData}
+    layout={{
+      autosize: true,
+      height: 500,
+      margin: { l: 0, r: 0, b: 0, t: 30 },
+      title: generatedChart,
+      scene: {
+        aspectmode: "cube",
+        xaxis: { title: xAxis },
+        yaxis: { title: yAxis },
+        zaxis: { title: "Auto Z" },
+      },
+    }}
+  />
     }
   };
 
   const isAxesSelectionEnabled = () =>
     excelData && chartType && !["Pie", "Doughnut"].includes(chartType);
+
+
+    const downloadChartAsPNG = async () => {
+    const chartElement = document.getElementById("chart-container");
+    if (!chartElement) return;
+    const canvas = await html2canvas(chartElement);
+    const link = document.createElement("a");
+    link.download = "chart.png";
+    link.href = canvas.toDataURL();
+    link.click();
+  };
+
+    const downloadChartAsPDF = async () => {
+    const chartElement = document.getElementById("chart-container");
+    if (!chartElement) return;
+    const canvas = await html2canvas(chartElement);
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF();
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save("chart.pdf");
+  };
+
+
+
+  // Build a cuboid mesh at (x, y, 0) with height z and width/depth size
+const createCuboid = (x, y, z, width = 0.4, depth = 0.4) => {
+  const hw = width / 2;
+  const hd = depth / 2;
+
+  const vertices = [
+    [x - hw, y - hd, 0],    // 0: bottom front left
+    [x + hw, y - hd, 0],    // 1: bottom front right
+    [x + hw, y + hd, 0],    // 2: bottom back right
+    [x - hw, y + hd, 0],    // 3: bottom back left
+    [x - hw, y - hd, z],    // 4: top front left
+    [x + hw, y - hd, z],    // 5: top front right
+    [x + hw, y + hd, z],    // 6: top back right
+    [x - hw, y + hd, z],    // 7: top back left
+  ];
+
+  // Each face defined by vertices indices (triangles)
+  const i = [
+    0, 0, 0, 4, 4, 7, 3, 3, 1, 5, 6, 6,
+  ];
+  const j = [
+    1, 3, 4, 5, 7, 4, 2, 7, 5, 6, 2, 1,
+  ];
+  const k = [
+    3, 7, 5, 6, 3, 0, 7, 4, 6, 2, 3, 0,
+  ];
+
+  // Plotly mesh3d needs flat arrays for x,y,z
+  const xArr = vertices.map((v) => v[0]);
+  const yArr = vertices.map((v) => v[1]);
+  const zArr = vertices.map((v) => v[2]);
+
+  return {
+    type: "mesh3d",
+    x: xArr,
+    y: yArr,
+    z: zArr,
+    i,
+    j,
+    k,
+    opacity: 0.9,
+    color: "#17BECF",
+  };
+};
+
+
 
   return (
     <>
@@ -384,11 +484,86 @@ const generateChart = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-2xl p-8 min-h-[400px] flex justify-center items-center border border-gray-200">
+
+
+{/* Chart Display */}
+
+ {generatedChart && (
+
+        <div
+           
+          className="relative "
+        >
+        
+            <div className="absolute top-2 right-2 flex flex-wrap gap-1 z-10">
+              <button
+                onClick={downloadChartAsPNG}
+                className="px-2 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded-lg shadow-md transition"
+              >
+                Download PNG
+              </button>
+              <button
+                onClick={downloadChartAsPDF}
+                className="px-2 py-1 text-xs bg-purple-500 hover:bg-purple-600 text-white rounded-lg shadow-md transition"
+              >
+                Download PDF
+              </button>
+              <button
+                onClick={() => setShowModal(true)}
+                className="px-2 py-1 text-xs bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg shadow-md transition"
+              >
+                Generate AI Analysis
+              </button>
+            </div>
+        </div>
+       )}
+
+          {/* //  Generate Chart */}
+        <div
+        id="chart-container"
+         className="bg-white rounded-2xl shadow-2xl p-8 h-[600px]  flex justify-center items-center">
           {renderChart() || (
             <p className="text-gray-400 text-lg">No chart generated yet</p>
           )}
         </div>
+
+
+        {/* Modal */}
+        {showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full space-y-4">
+              <h3 className="text-lg font-bold text-red-600">
+                Confirm Data Submission
+              </h3>
+              <p className="text-sm text-gray-600">
+                Submitting your data for AI analysis may share sensitive content
+                with external systems. Are you sure you want to continue?
+              </p>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-md"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setShowModal(false);
+                    // AI analysis logic will be added later
+                  }}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+
+
+
+        
       </div>
     </>
   );
