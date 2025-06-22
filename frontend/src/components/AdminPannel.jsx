@@ -143,7 +143,7 @@ export default function AdminPanel() {
 
            <div className="flex-grow"></div>
            {/* Pagination controls */}
-          <Box className="flex justify-center mt-6" style={{bottom:0}}>
+          <Box className="flex justify-center mt-6 mb-3" style={{bottom:0}}>
             <Pagination
               count={totalPages}
               page={currentPage}
