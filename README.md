@@ -2,4 +2,8 @@
 
 # NOW WE HAVE TO IMPIMLEMENT TWO THINGS 
 # 1ST - AI INTIGRATION
+<<<<<<< HEAD
 # 2ND - HISTORY 
+=======
+# 2ND - HISTORY 
+>>>>>>> c423d0d36cfffb482234261f564efd87eacd7caf
