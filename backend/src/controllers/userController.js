@@ -48,7 +48,7 @@ const register = async (req,res)=>{
     };
 };
 
-// Add fileName to user's history (create field if it doesn't exist)
+
 const addToHistory = async (req, res) => {
     const { username, fileName, timestamp } = req.body;
   try {
@@ -62,39 +62,6 @@ const addToHistory = async (req, res) => {
     res.status(500).json({ error: 'Failed to add history' });
   }
 };
-//   const { username, fileName } = req.body;
-
-//   if (!username || !fileName) {
-//     return res.status(400).json({ message: "Username and fileName are required" });
-//   }
-
-//   try {
-//     const user = await User.findOne({ username });
-//     console.log("Adding to user:", user.username);
-
- 
-
-
-//     if (!user) {
-//       return res.status(httpStatus.NOT_FOUND).json({ message: "User not found" });
-//     }
-
-//     // Initialize history if it doesn't exist
-//     if (!user.history) {
-//       user.history = [];
-//     }
-
-//     user.history.push({ fileName, timestamp: new Date() });
-//      console.log("Current history:", user.history);
-//     await user.save();
-
-    
-
-//     res.status(httpStatus.OK).json({ message: "History updated", history: user.history });
-//   } catch (e) {
-//     res.status(500).json({ message: "Error updating history", error: e.message });
-//   }
-// };
 
 const getUserHistory = async (req, res) => {
   const { username } = req.query;
@@ -113,11 +80,9 @@ const getUserHistory = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // ✅ Make sure history exists, even if empty
+   
     const history = user.history || [];
     
-console.log("Fetched history:", user.history);
-
 
     res.status(200).json({ history: user.history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) });
 

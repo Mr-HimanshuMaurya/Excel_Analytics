@@ -83,7 +83,7 @@ const Visualize = () => {
     ];
     if (validTypes.includes(file.type)) {
       setFileName(file.name);
-      setExcelFile(file); // <-- Add this line
+      setExcelFile(file); 
       setError("");
       readExcel(file);
     } else {
@@ -122,7 +122,7 @@ const Visualize = () => {
         setExcelData(jsonData);
         setHeaders(jsonData[0]);
 
-        // ✅ Save to backend history
+      
         const username = localStorage.getItem("username");
         if (username) {
           try {
@@ -131,12 +131,12 @@ const Visualize = () => {
               fileName: file.name,
               timestamp: new Date().toISOString(),
             });
-            console.log("✅ History saved to backend");
+            console.log("History saved to backend");
           } catch (err) {
-            console.error("❌ Failed to save history:", err);
+            console.error(" Failed to save history:", err);
           }
         } else {
-          console.warn("⚠ No username found in localStorage.");
+          console.warn(" No username found in localStorage.");
         }
       } else {
         setError("Excel file must contain at least one row of data");
@@ -275,9 +275,9 @@ if (values.some((val) => isNaN(val))) {
   });
 
   const bars = xValues.map((xVal, idx) => {
-    const yVal = idx; // Spread bars along Y
+    const yVal = idx;
     const height = yValues[idx];
-    return createCuboid(xVal, yVal, height);  // Correct
+    return createCuboid(xVal, yVal, height); 
   });
 
   data = bars;

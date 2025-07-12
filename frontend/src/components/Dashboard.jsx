@@ -25,7 +25,7 @@ function DashboardLayoutBranding(props) {
 const { userData } = React.useContext(AuthContext);
 console.log("userData", userData);
 
-  // 👇 useMemo to recompute NAVIGATION when user changes
+  
  const NAVIGATION = [
   {
     segment: 'visualize',

@@ -24,9 +24,9 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // ✅ Log updates to userData inside component
+  
   useEffect(() => {
-    console.log("✅ userData updated:", userData);
+    console.log("userData updated:", userData);
   }, [userData]);
 
   const handleLogin = async (username, password) => {
