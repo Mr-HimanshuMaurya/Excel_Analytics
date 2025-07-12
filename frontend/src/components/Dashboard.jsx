@@ -15,7 +15,6 @@ import withAuth from '../utils/withAuth';
 import AdminPanel from './AdminPannel.jsx';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { AuthContext } from './AuthContext';
-import History from './History.jsx';
 
 function DashboardLayoutBranding(props) {
   const { window } = props;
@@ -77,7 +76,7 @@ if (userData?.isAdmin) {
       return <Profile />;
     }
     if (pathname === '/history') {
-      return <History/>
+      return <p>History</p>;
     }
     if (pathname === '/adminPannel') {
       return <AdminPanel />;
@@ -120,4 +119,4 @@ DashboardLayoutBranding.propTypes = {
   window: PropTypes.func,
 };
 
-export default withAuth(DashboardLayoutBranding);
+export default DashboardLayoutBranding

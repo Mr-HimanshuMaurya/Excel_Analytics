@@ -1,38 +1,45 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import httpStatus from "http-status";
 
-export const AuthContext = createContext({});
+export const AuthContext = createContext();
 
 const client = axios.create({
   baseURL: "http://localhost:8080/api/v1/users",
 });
 
 export const AuthProvider = ({ children }) => {
-  const authContext = useContext(AuthContext);
-
-  const [userData, setUserData] = useState(authContext);
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUserData(JSON.parse(storedUser));
+
+    try {
+      if (storedUser && storedUser !== "undefined") {
+        setUserData(JSON.parse(storedUser));
+      }
+    } catch (error) {
+      console.error("Error parsing stored user data:", error);
+      localStorage.removeItem("user");
     }
   }, []);
 
+  // ✅ Log updates to userData inside component
+  useEffect(() => {
+    console.log("✅ userData updated:", userData);
+  }, [userData]);
+
   const handleLogin = async (username, password) => {
     try {
-      let request = await client.post("/login", {
-        username: username,
-        password: password,
+      const request = await client.post("/login", {
+        username,
+        password,
       });
 
       if (request.status === httpStatus.OK) {
         const user = request.data.user[0];
         setUserData(user);
         localStorage.setItem("user", JSON.stringify(user));
-
         return request.data.message;
       }
     } catch (error) {
@@ -42,10 +49,10 @@ export const AuthProvider = ({ children }) => {
 
   const handleRegister = async (username, email, password) => {
     try {
-      let request = await client.post("/register", {
-        username: username,
-        email: email,
-        password: password,
+      const request = await client.post("/register", {
+        username,
+        email,
+        password,
       });
       if (request.status === httpStatus.CREATED) {
         return request.data.message;
