@@ -49,10 +49,13 @@ export default function History() {
   }, []);
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <Typography variant="h4" gutterBottom className="text-center text-blue-700">
-        File Upload History
-      </Typography>
+    <>
+    <div className="p-6 space-y-8">
+      
+       <h2 className="text-3xl font-bold text-center text-blue-400">
+          File Upload History
+        </h2>
+      
 
       {loading ? (
         <div className="flex justify-center mt-10">
@@ -84,5 +87,6 @@ export default function History() {
         </div>
       )}
     </div>
+    </>
   );
 }
