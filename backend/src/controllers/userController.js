@@ -48,4 +48,110 @@ const register = async (req,res)=>{
     };
 };
 
-export {login, register}
+// Add fileName to user's history (create field if it doesn't exist)
+const addToHistory = async (req, res) => {
+    const { username, fileName, timestamp } = req.body;
+  try {
+    await User.updateOne(
+      { username },
+      { $push: { history: { fileName, timestamp } } }
+    );
+    res.json({ message: 'History updated' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to add history' });
+  }
+};
+//   const { username, fileName } = req.body;
+
+//   if (!username || !fileName) {
+//     return res.status(400).json({ message: "Username and fileName are required" });
+//   }
+
+//   try {
+//     const user = await User.findOne({ username });
+//     console.log("Adding to user:", user.username);
+
+ 
+
+
+//     if (!user) {
+//       return res.status(httpStatus.NOT_FOUND).json({ message: "User not found" });
+//     }
+
+//     // Initialize history if it doesn't exist
+//     if (!user.history) {
+//       user.history = [];
+//     }
+
+//     user.history.push({ fileName, timestamp: new Date() });
+//      console.log("Current history:", user.history);
+//     await user.save();
+
+    
+
+//     res.status(httpStatus.OK).json({ message: "History updated", history: user.history });
+//   } catch (e) {
+//     res.status(500).json({ message: "Error updating history", error: e.message });
+//   }
+// };
+
+const getUserHistory = async (req, res) => {
+  const { username } = req.query;
+
+  if (!username) {
+    return res.status(400).json({ message: "Username required" });
+  }
+
+  try {
+    const user = await User.findOne({ username });
+    console.log("Fetched user:", user.username);
+    
+
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // ✅ Make sure history exists, even if empty
+    const history = user.history || [];
+    
+console.log("Fetched history:", user.history);
+
+
+    res.status(200).json({ history: user.history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) });
+
+  } catch (e) {
+    return res.status(500).json({ message: "Error retrieving history", error: e.message });
+  }
+};
+
+
+const deleteFromHistory = async (req, res) => {
+  const { username, itemId } = req.body;
+
+  if (!username || !itemId) {
+    return res.status(400).json({ message: 'Username and itemId are required.' });
+  }
+
+  try {
+    // Adjust model as needed based on your DB schema
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    user.history = user.history.filter(item => item._id.toString() !== itemId);
+    await user.save();
+
+    return res.status(200).json({ message: 'History item deleted successfully.' });
+  } catch (error) {
+    console.error('Delete error:', error);
+    return res.status(500).json({ message: 'Server error.' });
+  }
+};
+
+
+
+export {login, register, addToHistory, getUserHistory, deleteFromHistory}

@@ -10,6 +10,7 @@ import EqualizerIcon from '@mui/icons-material/Equalizer';
 import HistoryIcon from '@mui/icons-material/History';
 import PersonIcon from '@mui/icons-material/Person';
 import Visualize from './Visualize';
+import History from './History.jsx';
 import Profile from './Profile';
 import withAuth from '../utils/withAuth';
 import AdminPanel from './AdminPannel.jsx';
@@ -76,7 +77,7 @@ if (userData?.isAdmin) {
       return <Profile />;
     }
     if (pathname === '/history') {
-      return <p>History</p>;
+      return <History/>;
     }
     if (pathname === '/adminPannel') {
       return <AdminPanel />;

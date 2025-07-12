@@ -40,6 +40,7 @@ export const AuthProvider = ({ children }) => {
         const user = request.data.user[0];
         setUserData(user);
         localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("username", user.username);
         return request.data.message;
       }
     } catch (error) {
