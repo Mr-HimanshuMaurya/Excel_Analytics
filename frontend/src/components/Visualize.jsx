@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import Plot from "react-plotly.js";
-import axios from "axios";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import {
@@ -50,49 +49,27 @@ const Visualize = () => {
   const [generatedChart, setGeneratedChart] = useState(null);
    const [showModal, setShowModal] = useState(false);
 
-   const [excelFile, setExcelFile] = useState(null);
-   const [history, setHistory] = useState(() => {
-  const saved = localStorage.getItem("history");
-  return saved ? JSON.parse(saved) : [];
-});
-
-
   useEffect(() => {
     setGeneratedChart(null);
   }, [chartType]);
 
- useEffect(() => {
-  if (excelFile && excelFile.name) {
-    const newEntry = {
-      name: excelFile.name,
-      timestamp: new Date().toISOString(),
-    };
-    const updatedHistory = [newEntry, ...history];
-    setHistory(updatedHistory);
-    localStorage.setItem("history", JSON.stringify(updatedHistory));
-  }
-}, [excelFile]);
-
-
   const handleFileChange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    const validTypes = [
-      "application/vnd.ms-excel",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    ];
-    if (validTypes.includes(file.type)) {
-      setFileName(file.name);
-      setExcelFile(file); 
-      setError("");
-      readExcel(file);
-    } else {
-      resetAll();
-      setError("Please upload a valid Excel file (.xls or .xlsx)");
+    const file = e.target.files[0];
+    if (file) {
+      const validTypes = [
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      ];
+      if (validTypes.includes(file.type)) {
+        setFileName(file.name);
+        setError("");
+        readExcel(file);
+      } else {
+        resetAll();
+        setError("Please upload a valid Excel file (.xls or .xlsx)");
+      }
     }
-  }
-};
-
+  };
 
   const resetAll = () => {
     setFileName("");
@@ -105,52 +82,30 @@ const Visualize = () => {
     setGeneratedChart(null);
     setError("");
     setShowModal(false);
-    setExcelFile(null);
-
   };
 
-  const readExcel = async (file) => {
-  const reader = new FileReader();
-  reader.onload = async (event) => {
-    try {
-      const data = new Uint8Array(event.target.result);
-      const workbook = XLSX.read(data, { type: "array" });
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+  const readExcel = (file) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-      if (jsonData.length > 1) {
-        setExcelData(jsonData);
-        setHeaders(jsonData[0]);
-
-      
-        const username = localStorage.getItem("username");
-        if (username) {
-          try {
-            await axios.post("http://localhost:8080/api/v1/users/add_history", {
-              username,
-              fileName: file.name,
-              timestamp: new Date().toISOString(),
-            });
-            console.log("History saved to backend");
-          } catch (err) {
-            console.error(" Failed to save history:", err);
-          }
+        if (jsonData.length > 1) {
+          setExcelData(jsonData);
+          setHeaders(jsonData[0]);
         } else {
-          console.warn(" No username found in localStorage.");
+          setError("Excel file must contain at least one row of data");
         }
-      } else {
-        setError("Excel file must contain at least one row of data");
+      } catch (err) {
+        console.error("Error reading Excel file:", err);
+        setError("Failed to read file. Please try another file.");
       }
-    } catch (err) {
-      console.error("Error reading Excel file:", err);
-      setError("Failed to read file. Please try another file.");
-    }
+    };
+    reader.readAsArrayBuffer(file);
   };
-
-  reader.readAsArrayBuffer(file);
-};
-
-
 
 const generateChart = () => {
   if (!excelData || !chartType) {
@@ -275,9 +230,9 @@ if (values.some((val) => isNaN(val))) {
   });
 
   const bars = xValues.map((xVal, idx) => {
-    const yVal = idx;
+    const yVal = idx; // Spread bars along Y
     const height = yValues[idx];
-    return createCuboid(xVal, yVal, height); 
+    return createCuboid(xVal, yVal, height);  // Correct
   });
 
   data = bars;

@@ -3,28 +3,31 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate,
 } from "react-router-dom";
 
-import LandingPage from "./components/landing.jsx";
-import Authentication from "./components/authentication.jsx";
-import { AuthProvider } from "./components/AuthContext.jsx";
-import "./App.css";
+import SmartAuthentication from "./components/SmartAuthentication";
 import AdminPanel from "./components/AdminPannel.jsx";
-import Dashboard from "./components/Dashboard.jsx"
+import Dashboard from "./components/Dashboard.jsx";
+import { AuthProvider } from "./components/AuthContext.jsx";
+import withAuth from "./utils/withAuth.jsx";
+import LandingPage from "./components/landing.jsx";
+import "./App.css";
+
+// Wrap protected routes
+const ProtectedDashboard = withAuth(Dashboard);
+const ProtectedAdminPanel = withAuth(AdminPanel);
+
 function App() {
-  // const isAuthenticated = true; //!!localStorage.getItem("token");
   return (
     <div className="App">
       <Router>
         <AuthProvider>
-        <Routes>
-          
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/auth" element={<Authentication />} />
-          <Route path="/dashboard" element={<Dashboard/>} />
-          
-        </Routes>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/auth" element={<SmartAuthentication />} />
+            <Route path="/dashboard" element={<ProtectedDashboard />} />
+            <Route path="/adminPannel" element={<ProtectedAdminPanel />} />
+          </Routes>
         </AuthProvider>
       </Router>
     </div>

@@ -5,12 +5,14 @@ import { Button } from '@mui/material';
 const Profile = () => {
    const { userData, setUserData } = useContext(AuthContext);
    const navigate = useNavigate();
+   
     const handleLogout = () => {
-      // Clear user data (you may also want to clear tokens from localStorage/sessionStorage)
-      setUserData(null);
-      // Redirect to login page
-      navigate('/');
-   };
+            setUserData(null);
+            localStorage.removeItem("user");
+            localStorage.removeItem("username");
+            navigate('/');
+            };
+
     return (
        
         <div className='flex justify-center flex-col items-center mt-10'>

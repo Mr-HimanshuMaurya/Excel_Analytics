@@ -1,8 +1,12 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useContext } from "react";
 import axios from "axios";
 import httpStatus from "http-status";
 
-export const AuthContext = createContext();
+const AuthContext = createContext();
+
+export const useAuth = ()=>{
+    return useContext(AuthContext)
+}
 
 const client = axios.create({
   baseURL: "http://localhost:8080/api/v1/users",
@@ -76,3 +80,5 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
+export { AuthContext};
