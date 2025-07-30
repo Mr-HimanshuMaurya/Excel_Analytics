@@ -8,6 +8,9 @@ import {
   CircularProgress,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import server from '../environment';
+
+const BASE_URL= server
 
 export default function History() {
   const [history, setHistory] = useState([]);
@@ -23,7 +26,7 @@ export default function History() {
   }
 
   try {
-    const res = await axios.get(`http://localhost:8080/api/v1/users/get_history?username=${username}`);
+    const res = await axios.get(`${BASE_URL}/api/v1/users/get_history?username=${username}`);
     setHistory(res.data.history || []);
   } catch (err) {
     console.error('Error fetching history:', err);
@@ -35,7 +38,7 @@ export default function History() {
 
   const deleteItem = async (itemId) => {
     try {
-      await axios.delete(`http://localhost:8080/api/v1/users/delete_history_item`, {
+      await axios.delete(`${BASE_URL}/api/v1/users/delete_history_item`, {
         data: { username, itemId }
       });
       setHistory(prev => prev.filter(item => item._id !== itemId));
