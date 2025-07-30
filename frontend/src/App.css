@@ -17,16 +17,14 @@
 }
 .reg{
   color: rgb(28, 224, 246);
-  font-size: 1.2rem;
   font-weight: 600;
 }
 .log{
   color: rgb(0, 155, 239);
-  font-size: 1.2rem;
   font-weight: 600;
 }
-.landingPageContainer nav h2{
-  font-size: 2rem;
+.landingPageContainer nav p{
+ 
   font-weight: 700;
   cursor: pointer;
   color: #d97500;
@@ -63,3 +61,20 @@
 }
 
 
+/* React bits */
+
+
+.text-type {
+  display: inline-block;
+  white-space: pre-wrap;
+}
+
+.text-type__cursor {
+  margin-left: 0.25rem;
+  display: inline-block;
+  opacity: 1;
+}
+
+.text-type__cursor--hidden {
+  display: none;
+}
