@@ -10,6 +10,9 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SunnyIcon from '@mui/icons-material/Sunny';
+import server from "../environment.jsx"
+
+export const BASE_URL = server;
 
 export default function AdminPanel() {
   const { userData } = useContext(AuthContext);
@@ -33,7 +36,7 @@ export default function AdminPanel() {
 
     // Fetch all users (only admin can)
      setLoading(true);
-     axios.post("http://localhost:8080/api/v1/admin/users", {}, {
+     axios.post(`${BASE_URL}/api/v1/admin/users`, {}, {
      headers: { "x-user-id": userData._id }
 })
     .then((res) => {
@@ -54,7 +57,7 @@ export default function AdminPanel() {
   };
 
   const confirmDelete = () => {
-    axios.delete(`http://localhost:8080/api/v1/admin/user/${selectedUserId}`, {
+    axios.delete(`${BASE_URL}/api/v1/admin/user/${selectedUserId}`, {
       headers: { "x-user-id": userData._id }
     })
     .then(() => {
